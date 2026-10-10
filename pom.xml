@@ -11,8 +11,8 @@
     <groupId>com.watermgmt</groupId>
     <artifactId>distribution-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Integrated Water & Natural Resource Management</name>
-    <description>Integrated Water & Natural Resource Management</description>
+    <name>distribution-service</name>
+    <description>distribution-service</description>
     <url/>
     <licenses>
         <license/>
