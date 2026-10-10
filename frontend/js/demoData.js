@@ -37,5 +37,14 @@ const demoMaintenance = [
   { id: 3, description: 'Dam cleaning', location: 'Narmada Valley', date: '2023-09-15', status: 'Planned' }
 ];
 if (typeof window !== 'undefined') {
-  window.demoData = { demoResources, demoConsumption, demoComplaints, demoMaintenance };
+  const savedData = localStorage.getItem('waterMgmtDemoData');
+  if (savedData) {
+    try {
+      window.demoData = JSON.parse(savedData);
+    } catch (e) {
+      window.demoData = { demoResources, demoConsumption, demoComplaints, demoMaintenance };
+    }
+  } else {
+    window.demoData = { demoResources, demoConsumption, demoComplaints, demoMaintenance };
+  }
 }

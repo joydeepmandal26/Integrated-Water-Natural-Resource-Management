@@ -32,9 +32,21 @@ function loadResources() {
 
 addBtn?.addEventListener('click', () => {
   const name = prompt('Resource name');
+  const location = prompt('Location');
+  const type = prompt('Type (e.g., River, Lake, Reservoir)');
   const capacity = prompt('Capacity (m³)');
+  const level = prompt('Current Level (m³)');
+  const status = prompt('Status (e.g., Good, Fair, Excellent)');
   if (name && capacity) {
-    apiRequest('POST', '/api/resources', { body: JSON.stringify({ name, capacity: Number(capacity) }) })
+    const payload = {
+      name,
+      location,
+      type,
+      capacity: Number(capacity),
+      level: Number(level) || 0,
+      status
+    };
+    apiRequest('POST', '/api/resources', { body: JSON.stringify(payload) })
       .then(() => loadResources())
       .catch(err => console.error(err));
   }
@@ -45,8 +57,22 @@ tableBody?.addEventListener('click', e => {
   if (e.target.matches('.editBtn')) {
     const id = e.target.dataset.id;
     const newName = prompt('New name');
+    const newLocation = prompt('New location');
+    const newType = prompt('New type');
+    const newCapacity = prompt('New capacity (m³)');
+    const newLevel = prompt('New level (m³)');
+    const newStatus = prompt('New status');
+    
     if (newName) {
-      apiRequest('PUT', `/api/resources/${id}`, { body: JSON.stringify({ name: newName }) })
+      const payload = {
+        name: newName,
+        location: newLocation,
+        type: newType,
+        capacity: Number(newCapacity),
+        level: Number(newLevel),
+        status: newStatus
+      };
+      apiRequest('PUT', `/api/resources/${id}`, { body: JSON.stringify(payload) })
         .then(() => loadResources())
         .catch(err => console.error(err));
     }

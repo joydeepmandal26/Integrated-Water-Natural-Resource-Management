@@ -6,6 +6,12 @@
  * to simulate network latency.
  */
 
+function saveDemoData() {
+  if (typeof window !== 'undefined' && window.demoData) {
+    localStorage.setItem('waterMgmtDemoData', JSON.stringify(window.demoData));
+  }
+}
+
 function apiRequest(arg1, arg2, arg3) {
   // Support two signatures:
   // 1. apiRequest(path, options) – existing usage
@@ -60,6 +66,7 @@ if (path === '/api/complaints' && options && options.method === 'POST') {
   // Push into demo data array
   if (window.demoData && Array.isArray(window.demoData.demoComplaints)) {
     window.demoData.demoComplaints.push(newComplaint);
+    saveDemoData();
   }
   return new Promise(resolve => {
     setTimeout(() => resolve({ ok: true, json: () => Promise.resolve({ id: trackingId }) }), 300);
@@ -74,6 +81,7 @@ if (path === '/api/maintenance' && options && options.method === 'POST') {
     const newId = window.demoData.demoMaintenance.length ? Math.max(...window.demoData.demoMaintenance.map(m => m.id)) + 1 : 1;
     const newRecord = { id: newId, ...payload };
     window.demoData.demoMaintenance.push(newRecord);
+    saveDemoData();
   }
   return new Promise(resolve => setTimeout(() => resolve({ ok: true, json: () => Promise.resolve({}) }), 300));
 }
@@ -86,6 +94,18 @@ if (path === '/api/resources' && options && options.method === 'POST') {
     const newId = window.demoData.demoResources.length ? Math.max(...window.demoData.demoResources.map(r => r.id)) + 1 : 1;
     const newResource = { id: newId, status: 'Good', level: payload.capacity, ...payload };
     window.demoData.demoResources.push(newResource);
+    
+    // Also push a default consumption record for the new resource so it shows up in the charts/tables
+    if (window.demoData.demoConsumption && Array.isArray(window.demoData.demoConsumption.consumptionTrend)) {
+      const today = new Date().toISOString().split('T')[0];
+      window.demoData.demoConsumption.consumptionTrend.push({
+        date: today,
+        location: payload.location || 'N/A',
+        value: Math.floor(payload.capacity * 0.1) || 100
+      });
+    }
+    
+    saveDemoData();
   }
   return new Promise(resolve => setTimeout(() => resolve({ ok: true, json: () => Promise.resolve({}) }), 300));
 }
@@ -103,6 +123,7 @@ if (options && options.method === 'DELETE') {
        window.demoData.demoResources = window.demoData.demoResources.filter(r => r.id !== id);
      }
   }
+  saveDemoData();
   return new Promise(resolve => setTimeout(() => resolve({ ok: true, json: () => Promise.resolve({}) }), 300));
 }
 
@@ -123,10 +144,27 @@ if (options && options.method === 'PUT') {
        if (idx !== -1) window.demoData.demoResources[idx] = { ...window.demoData.demoResources[idx], ...payload };
      }
   }
+  saveDemoData();
   return new Promise(resolve => setTimeout(() => resolve({ ok: true, json: () => Promise.resolve({}) }), 300));
 }
     // Determine response data based on path
     let respData = dataMap[path];
+    if (path === '/api/consumption' && window.demoData.demoResources) {
+      const resources = window.demoData.demoResources;
+      const totalResources = resources.length;
+      const totalCapacity = resources.reduce((sum, r) => sum + (r.capacity || 0), 0);
+      const availableWater = resources.reduce((sum, r) => sum + (r.level || 0), 0);
+      const distribution = resources.map(r => ({
+        name: r.name,
+        value: r.level || 0
+      }));
+      window.demoData.demoConsumption.totalResources = totalResources;
+      window.demoData.demoConsumption.totalCapacity = totalCapacity;
+      window.demoData.demoConsumption.availableWater = availableWater;
+      window.demoData.demoConsumption.distribution = distribution;
+      respData = window.demoData.demoConsumption;
+    }
+    
     if (!respData && path.startsWith('/api/complaints/')) {
       const id = path.split('/').pop();
       respData = window.demoData.demoComplaints.find(c => c.id === id) || { error: 'Not found' };
