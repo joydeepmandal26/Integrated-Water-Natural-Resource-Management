@@ -1,0 +1,11 @@
+* [33m351afc6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mwater-resource-db1[m[33m, [m[1;32mmaster[m[33m)[m Add resource validation
+* [33m3c2e2e2[m Add water resource validation
+* [33mae1a762[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Delete .idea directory
+* [33mb7c60be[m new
+*   [33me3eb51e[m Merge remote-tracking branch 'origin/main'
+[33m|[m[34m\[m  
+[33m|[m * [33m4424cb5[m kim chaewon
+* [34m|[m [33m302d589[m configs
+[34m|[m[34m/[m  
+* [33m9f76ac0[m init commit
+* [33m175a3f1[m[33m ([m[1;31morigin/web-app[m[33m, [m[1;31morigin/water-resource[m[33m, [m[1;31morigin/water-operations[m[33m, [m[1;31morigin/testing_docs[m[33m, [m[1;31morigin/quality_maintainance[m[33m)[m Add files via upload
