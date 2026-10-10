@@ -1,5 +1,4 @@
 // consumption.js – demo mode chart and table rendering
-import { apiRequest } from './api.js';
 
 const ctx = document.getElementById('consumptionChart')?.getContext('2d');
 let chartInstance = null;

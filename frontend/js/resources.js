@@ -1,5 +1,4 @@
 // resources.js – handles displaying, adding, editing, and deleting water resources (demo mode)
-import { apiRequest } from './api.js';
 
 const tableBody = document.getElementById('resourceTableBody');
 const addBtn = document.getElementById('addBtn');
@@ -11,7 +10,11 @@ function renderResources(resources) {
     tr.innerHTML = `
       <td>${res.id}</td>
       <td>${res.name}</td>
+      <td>${res.location || 'N/A'}</td>
+      <td>${res.type || 'N/A'}</td>
       <td>${res.capacity} m³</td>
+      <td>${res.level || 'N/A'} m³</td>
+      <td>${res.status || 'N/A'}</td>
       <td>
         <button class='btn editBtn' data-id='${res.id}'>Edit</button>
         <button class='btn deleteBtn' data-id='${res.id}'>Delete</button>
@@ -22,6 +25,7 @@ function renderResources(resources) {
 
 function loadResources() {
   apiRequest('GET', '/api/resources')
+    .then(res => res.json())
     .then(data => renderResources(data))
     .catch(err => console.error('Failed to load resources', err));
 }
@@ -30,7 +34,7 @@ addBtn?.addEventListener('click', () => {
   const name = prompt('Resource name');
   const capacity = prompt('Capacity (m³)');
   if (name && capacity) {
-    apiRequest('POST', '/api/resources', { name, capacity: Number(capacity) })
+    apiRequest('POST', '/api/resources', { body: JSON.stringify({ name, capacity: Number(capacity) }) })
       .then(() => loadResources())
       .catch(err => console.error(err));
   }
@@ -42,7 +46,7 @@ tableBody?.addEventListener('click', e => {
     const id = e.target.dataset.id;
     const newName = prompt('New name');
     if (newName) {
-      apiRequest('PUT', `/api/resources/${id}`, { name: newName })
+      apiRequest('PUT', `/api/resources/${id}`, { body: JSON.stringify({ name: newName }) })
         .then(() => loadResources())
         .catch(err => console.error(err));
     }
