@@ -1,5 +1,4 @@
 // consumption.js – demo mode chart and table rendering
-import { apiRequest } from './api.js';
 
 const ctx = document.getElementById('consumptionChart')?.getContext('2d');
 let chartInstance = null;
@@ -27,6 +26,7 @@ function renderChart(trendData) {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       scales: {
         x: { display: true },
         y: { beginAtZero: true },

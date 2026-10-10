@@ -10,10 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('complaintForm');
   const submitBtn = document.getElementById('submitBtn');
   const statusMsg = document.getElementById('statusMsg');
-  const demoIndicator = document.getElementById('demoIndicator');
 
   if (CONFIG.DEMO_MODE) {
-    demoIndicator.style.display = 'block';
   }
 
   form.addEventListener('submit', async (e) => {

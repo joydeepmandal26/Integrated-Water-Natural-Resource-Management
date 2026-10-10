@@ -6,6 +6,12 @@
  * to simulate network latency.
  */
 
+function saveDemoData() {
+  if (typeof window !== 'undefined' && window.demoData) {
+    localStorage.setItem('waterMgmtDemoData', JSON.stringify(window.demoData));
+  }
+}
+
 function apiRequest(arg1, arg2, arg3) {
   // Support two signatures:
   // 1. apiRequest(path, options) – existing usage
@@ -60,13 +66,105 @@ if (path === '/api/complaints' && options && options.method === 'POST') {
   // Push into demo data array
   if (window.demoData && Array.isArray(window.demoData.demoComplaints)) {
     window.demoData.demoComplaints.push(newComplaint);
+    saveDemoData();
   }
   return new Promise(resolve => {
     setTimeout(() => resolve({ ok: true, json: () => Promise.resolve({ id: trackingId }) }), 300);
   });
 }
+
+// Handle POST to maintenance
+if (path === '/api/maintenance' && options && options.method === 'POST') {
+  let payload = {};
+  try { payload = JSON.parse(options.body || '{}'); } catch (e) { }
+  if (window.demoData && Array.isArray(window.demoData.demoMaintenance)) {
+    const newId = window.demoData.demoMaintenance.length ? Math.max(...window.demoData.demoMaintenance.map(m => m.id)) + 1 : 1;
+    const newRecord = { id: newId, ...payload };
+    window.demoData.demoMaintenance.push(newRecord);
+    saveDemoData();
+  }
+  return new Promise(resolve => setTimeout(() => resolve({ ok: true, json: () => Promise.resolve({}) }), 300));
+}
+
+// Handle POST to resources
+if (path === '/api/resources' && options && options.method === 'POST') {
+  let payload = {};
+  try { payload = JSON.parse(options.body || '{}'); } catch (e) { }
+  if (window.demoData && Array.isArray(window.demoData.demoResources)) {
+    const newId = window.demoData.demoResources.length ? Math.max(...window.demoData.demoResources.map(r => r.id)) + 1 : 1;
+    const newResource = { id: newId, status: 'Good', level: payload.capacity, ...payload };
+    window.demoData.demoResources.push(newResource);
+    
+    // Also push a default consumption record for the new resource so it shows up in the charts/tables
+    if (window.demoData.demoConsumption && Array.isArray(window.demoData.demoConsumption.consumptionTrend)) {
+      const today = new Date().toISOString().split('T')[0];
+      window.demoData.demoConsumption.consumptionTrend.push({
+        date: today,
+        location: payload.location || 'N/A',
+        value: Math.floor(payload.capacity * 0.1) || 100
+      });
+    }
+    
+    saveDemoData();
+  }
+  return new Promise(resolve => setTimeout(() => resolve({ ok: true, json: () => Promise.resolve({}) }), 300));
+}
+
+// Handle DELETE
+if (options && options.method === 'DELETE') {
+  if (path.startsWith('/api/maintenance/')) {
+     const id = parseInt(path.split('/').pop(), 10);
+     if (window.demoData && Array.isArray(window.demoData.demoMaintenance)) {
+       window.demoData.demoMaintenance = window.demoData.demoMaintenance.filter(m => m.id !== id);
+     }
+  } else if (path.startsWith('/api/resources/')) {
+     const id = parseInt(path.split('/').pop(), 10);
+     if (window.demoData && Array.isArray(window.demoData.demoResources)) {
+       window.demoData.demoResources = window.demoData.demoResources.filter(r => r.id !== id);
+     }
+  }
+  saveDemoData();
+  return new Promise(resolve => setTimeout(() => resolve({ ok: true, json: () => Promise.resolve({}) }), 300));
+}
+
+// Handle PUT (Edit)
+if (options && options.method === 'PUT') {
+  let payload = {};
+  try { payload = JSON.parse(options.body || '{}'); } catch (e) { }
+  if (path.startsWith('/api/maintenance/')) {
+     const id = parseInt(path.split('/').pop(), 10);
+     if (window.demoData && Array.isArray(window.demoData.demoMaintenance)) {
+       const idx = window.demoData.demoMaintenance.findIndex(m => m.id === id);
+       if (idx !== -1) window.demoData.demoMaintenance[idx] = { ...window.demoData.demoMaintenance[idx], ...payload };
+     }
+  } else if (path.startsWith('/api/resources/')) {
+     const id = parseInt(path.split('/').pop(), 10);
+     if (window.demoData && Array.isArray(window.demoData.demoResources)) {
+       const idx = window.demoData.demoResources.findIndex(r => r.id === id);
+       if (idx !== -1) window.demoData.demoResources[idx] = { ...window.demoData.demoResources[idx], ...payload };
+     }
+  }
+  saveDemoData();
+  return new Promise(resolve => setTimeout(() => resolve({ ok: true, json: () => Promise.resolve({}) }), 300));
+}
     // Determine response data based on path
     let respData = dataMap[path];
+    if (path === '/api/consumption' && window.demoData.demoResources) {
+      const resources = window.demoData.demoResources;
+      const totalResources = resources.length;
+      const totalCapacity = resources.reduce((sum, r) => sum + (r.capacity || 0), 0);
+      const availableWater = resources.reduce((sum, r) => sum + (r.level || 0), 0);
+      const distribution = resources.map(r => ({
+        name: r.name,
+        value: r.level || 0
+      }));
+      window.demoData.demoConsumption.totalResources = totalResources;
+      window.demoData.demoConsumption.totalCapacity = totalCapacity;
+      window.demoData.demoConsumption.availableWater = availableWater;
+      window.demoData.demoConsumption.distribution = distribution;
+      respData = window.demoData.demoConsumption;
+    }
+    
     if (!respData && path.startsWith('/api/complaints/')) {
       const id = path.split('/').pop();
       respData = window.demoData.demoComplaints.find(c => c.id === id) || { error: 'Not found' };
@@ -90,8 +188,8 @@ function mockData(path, options) {
   // Dashboard related endpoints
   if (path === '/api/resources') {
     return [
-      { id: 1, name: 'River A', location: 'North Basin', type: 'River', capacity: 1200, level: 900, status: 'Good' },
-      { id: 2, name: 'Lake B', location: 'East Valley', type: 'Lake', capacity: 2000, level: 1500, status: 'Fair' },
+      { id: 1, name: 'Ganges River', location: 'Haridwar Basin', type: 'River', capacity: 1200, level: 900, status: 'Good' },
+      { id: 2, name: 'Chilika Lake', location: 'Odisha Coast', type: 'Lake', capacity: 2000, level: 1500, status: 'Fair' },
     ];
   }
   if (path === '/api/consumption') {
@@ -109,8 +207,8 @@ function mockData(path, options) {
         { date: '2023-09-05', value: 190 },
       ],
       distribution: [
-        { name: 'River A', value: 900 },
-        { name: 'Lake B', value: 1500 },
+        { name: 'Ganges River', value: 900 },
+        { name: 'Chilika Lake', value: 1500 },
       ],
     };
   }
@@ -120,8 +218,8 @@ function mockData(path, options) {
       return { id: 'C' + Math.floor(Math.random() * 1000).toString().padStart(3, '0') };
     }
     return [
-      { id: 'C001', date: '2023-09-04', location: 'North Zone', category: 'Leak', status: 'Pending' },
-      { id: 'C002', date: '2023-09-03', location: 'South Zone', category: 'Contamination', status: 'Resolved' },
+      { id: 'C001', date: '2023-09-04', location: 'Delhi NCR', category: 'Leak', status: 'Pending' },
+      { id: 'C002', date: '2023-09-03', location: 'Chennai South', category: 'Contamination', status: 'Resolved' },
     ];
   }
 // Complaint lookup by ID
@@ -133,8 +231,8 @@ if (path.startsWith('/api/complaints/')) {
 // Maintenance mock data
 if (path === '/api/maintenance') {
   return [
-    { id: 1, description: 'Pump inspection', location: 'North Basin', date: '2023-09-10', status: 'Scheduled' },
-    { id: 2, description: 'Valve replacement', location: 'East Valley', date: '2023-09-12', status: 'Completed' },
+    { id: 1, description: 'Pump inspection', location: 'Haridwar Basin', date: '2023-09-10', status: 'Scheduled' },
+    { id: 2, description: 'Valve replacement', location: 'Odisha Coast', date: '2023-09-12', status: 'Completed' },
   ];
 }
 // Default empty array/object
