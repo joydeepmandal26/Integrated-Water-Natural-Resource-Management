@@ -1,0 +1,23 @@
+server:
+  port: 8081
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: resources
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/resources/**
+        - id: consumption
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/consumption/**
+        - id: complaints
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/complaints/**
+        - id: maintenance
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/maintenance/**
