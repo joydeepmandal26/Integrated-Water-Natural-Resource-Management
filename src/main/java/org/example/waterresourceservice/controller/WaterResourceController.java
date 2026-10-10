@@ -1,5 +1,6 @@
 package org.example.waterresourceservice.controller;
 
+import jakarta.validation.Valid;
 import org.example.waterresourceservice.entity.WaterResource;
 import org.example.waterresourceservice.service.WaterResourceService;
 import org.springframework.http.ResponseEntity;
@@ -30,14 +31,14 @@ public class WaterResourceController {
     }
 
     @PostMapping
-    public WaterResource createResource(@RequestBody WaterResource resource) {
+    public WaterResource createResource(@Valid @RequestBody WaterResource resource) {
         return service.createResource(resource);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<WaterResource> updateResource(
             @PathVariable Long id,
-            @RequestBody WaterResource resource) {
+            @Valid @RequestBody WaterResource resource) {
 
         try {
             return ResponseEntity.ok(service.updateResource(id, resource));

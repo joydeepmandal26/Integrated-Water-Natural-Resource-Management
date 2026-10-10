@@ -1,9 +1,11 @@
 package org.example.waterresourceservice.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "water_resources")
@@ -104,5 +106,14 @@ public class WaterResource {
 
     public void setOutflow(Double outflow) {
         this.outflow = outflow;
+    }
+
+    @JsonIgnore @AssertTrue(message = "Current level cannot be greater than capacity")
+    public boolean isCurrentLevelValid() {
+        if (currentLevel == null || capacity == null) {
+            return true;
+        }
+
+        return currentLevel <= capacity;
     }
 }
