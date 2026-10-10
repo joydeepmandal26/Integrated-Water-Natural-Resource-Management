@@ -26,6 +26,7 @@ function renderChart(trendData) {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       scales: {
         x: { display: true },
         y: { beginAtZero: true },

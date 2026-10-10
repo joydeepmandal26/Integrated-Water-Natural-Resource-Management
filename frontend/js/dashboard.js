@@ -64,6 +64,7 @@ function loadConsumptionChart() {
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: { legend: { display: true } },
         }
       });
@@ -87,7 +88,7 @@ function loadDistributionChart() {
             backgroundColor: ['#0066cc', '#0099aa', '#00cc66', '#88ddff'],
           }]
         },
-        options: { responsive: true }
+        options: { responsive: true, maintainAspectRatio: false }
       });
     })
     .catch(err => console.error('Distribution chart error', err));
