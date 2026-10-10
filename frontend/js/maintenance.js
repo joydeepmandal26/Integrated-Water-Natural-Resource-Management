@@ -1,5 +1,4 @@
 // maintenance.js – demo mode maintenance schedule handling
-import { apiRequest } from './api.js';
 
 const tableBody = document.getElementById('maintenanceTableBody');
 const addBtn = document.getElementById('addMaintenanceBtn');
@@ -36,10 +35,12 @@ addBtn?.addEventListener('click', () => {
   const status = prompt('Status (Scheduled/Completed)');
   if (description && location && date && status) {
     apiRequest('POST', '/api/maintenance', {
-      description,
-      location,
-      date,
-      status,
+      body: JSON.stringify({
+        description,
+        location,
+        date,
+        status,
+      })
     })
       .then(() => loadMaintenance())
       .catch(err => console.error(err));
@@ -52,7 +53,7 @@ tableBody?.addEventListener('click', e => {
     const id = e.target.dataset.id;
     const newDesc = prompt('New description');
     if (newDesc) {
-      apiRequest('PUT', `/api/maintenance/${id}`, { description: newDesc })
+      apiRequest('PUT', `/api/maintenance/${id}`, { body: JSON.stringify({ description: newDesc }) })
         .then(() => loadMaintenance())
         .catch(err => console.error(err));
     }
