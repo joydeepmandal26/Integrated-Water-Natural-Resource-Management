@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Complaint Tracking</title>
+  <link rel='stylesheet' href='css/style.css'>
+  <script src='js/config.js'></script>
+  <script src='js/demoData.js?v=7'></script>
+  <script src='js/api.js?v=7'></script>
+  <script src='js/tracking.js' defer></script>
+</head>
+<body>
+  <div class='sidebar'>
+    <h2>WaterMgmt</h2>
+    <ul>
+      <li><a href='index.html'>Dashboard</a></li>
+      <li><a href='resources.html'>Resources</a></li>
+      <li><a href='consumption.html'>Consumption</a></li>
+      <li><a href='complaints.html'>Complaints</a></li>
+      <li><a href='tracking.html' class='active'>Tracking</a></li>
+      <li><a href='maintenance.html'>Maintenance</a></li>
+    </ul>
+  </div>
+  <div class='main'>
+    <div class='header'>
+      <h1>Complaint Tracking</h1>
+      <span class='menu-toggle' onclick='toggleSidebar()'>☰</span>
+    </div>
+    <div class='content'>
+      <div class='search'>
+        <label for='trackId'>Enter Tracking ID:</label>
+        <input type='text' id='trackId' placeholder='e.g., C001'>
+        <button class='btn' id='trackBtn'>Track</button>
+      </div>
+      <div id='trackingResult' style='margin-top:20px;'></div>
+    </div>
+  </div>
+  <script>
+    function toggleSidebar(){
+      document.querySelector('.sidebar').classList.toggle('open');
+    }
+  </script>
+</body>
+</html>
